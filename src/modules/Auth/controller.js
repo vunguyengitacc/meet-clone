@@ -18,11 +18,8 @@ const login = async (req, res, next) => {
     if (!user) {
       return Result.error(res, { message: 'Email does not exist' }, 401);
     }
-    if (!user.password) {
-      return Result.error(res, { message: 'Please login using github with this account' }, 401);
-    }
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
+    const passwordComparer = await bcrypt.compare(password, user.password);
+    if (!passwordComparer) {
       return Result.error(res, { message: 'Wrong password' }, 401);
     }
     const access_token = createAccessToken(user);
@@ -35,22 +32,21 @@ const login = async (req, res, next) => {
 const register = async (req, res, next) => {
   try {
     const { fullname, username, email, password } = req.body;
-    const checkUsername = await User.find({ username }).countDocuments();
-    if (checkUsername) {
-      return Result.error(res, { message: 'Username này đã được sử dụng' });
+    const usernameChecker = await User.find({ username }).countDocuments();
+    if (usernameChecker) {
+      return Result.error(res, { message: 'Username has already used' });
     }
-    const checkEmail = await User.find({ email }).countDocuments();
-    if (checkEmail) {
-      return Result.error(res, { message: 'Email này đã được sử dụng' });
+    const emailChecker = await User.find({ email }).countDocuments();
+    if (emailChecker) {
+      return Result.error(res, { message: 'Email has already used' });
     }
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hash = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       fullname,
       username,
       email,
-      password: hashedPassword,
-      profilePictureUrl: `https://avatars.dicebear.com/4.5/api/initials/${fullname}.svg`,
+      password: hash,
+      avatarURI: `https://avatars.dicebear.com/4.5/api/initials/${fullname}.svg`,
     });
     const access_token = createAccessToken(newUser);
     Result.success(res, { access_token }, 201);
