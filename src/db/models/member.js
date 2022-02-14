@@ -4,8 +4,8 @@ const memberSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'rooms' },
-    permissionId: { type: mongoose.Schema.Types.ObjectId, ref: 'permissions' },
-    roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'roles' },
+    permissionId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'permissions' }],
+    isAdmin: Boolean,
   },
   {
     timestamps: true,
@@ -32,12 +32,6 @@ memberSchema.virtual('room', {
 memberSchema.virtual('permissions', {
   ref: 'permissions',
   localField: 'permissionId',
-  foreignField: '_id',
-});
-
-memberSchema.virtual('roles', {
-  ref: 'roles',
-  localField: 'roleId',
   foreignField: '_id',
 });
 

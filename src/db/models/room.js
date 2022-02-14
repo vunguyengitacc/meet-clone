@@ -11,6 +11,7 @@ const roomSchema = new mongoose.Schema(
     isPrivate: Boolean,
     isRecording: Boolean,
     isShowOldMessage: Boolean,
+    joinRequest: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }],
   },
   {
     toJSON: {

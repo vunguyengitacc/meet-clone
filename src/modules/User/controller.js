@@ -15,7 +15,7 @@ const getAll = async (req, res, next) => {
 const updateInfo = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const data = { ...req.body, updateAt: Date.now() };
+    const data = { ...req.body };
     if (data.password) delete data.password;
     const rs = await userService.update(userId, data);
     Result.success(res, { rs });
@@ -33,7 +33,7 @@ const updatePassword = async (req, res, next) => {
       return Result.error(res, { message: 'Current password is wrong' }, 401);
     }
     const hash = await bcrypt.hash(newPassword, 10);
-    const data = { password: hash, updateAt: Date.now() };
+    const data = { password: hash };
     const rs = await userService.update(currentUser._id, data);
     Result.success(res, { rs });
   } catch (error) {
