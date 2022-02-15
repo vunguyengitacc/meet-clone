@@ -22,7 +22,7 @@ const roomSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ accessLink: 'text', name: 'text' });
+roomSchema.index({ accessLink: 'text', name: 'text' });
 
 const Room = mongoose.model('rooms', roomSchema);
 export default Room;

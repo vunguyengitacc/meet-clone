@@ -10,8 +10,11 @@ const getOne = async ({ roomId }) => {
 };
 const create = async (data) => {
   try {
-    const data = await Room.create(data);
-    return data;
+    if (!data.isPrivate) data.isPrivate = false;
+    if (!data.isShowOldMessage) data.isShowOldMessage = false;
+    if (!data.isRecording) data.isRecording = false;
+    const rs = await Room.create(data);
+    return rs;
   } catch (error) {
     throw error;
   }

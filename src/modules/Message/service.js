@@ -2,8 +2,8 @@ import Message from 'db/models/message';
 
 const create = async (data) => {
   try {
-    const data = await Message.create(data);
-    return data;
+    const rs = await Message.create(data);
+    return rs;
   } catch (error) {
     throw error;
   }

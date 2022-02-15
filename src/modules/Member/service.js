@@ -10,16 +10,16 @@ const getOne = async ({ memberId }) => {
 };
 const create = async (data) => {
   try {
-    const data = await Member.create(data);
-    return data;
+    const rs = await Member.create(data);
+    return rs;
   } catch (error) {
     throw error;
   }
 };
 const update = async (memberId, data) => {
   try {
-    const data = await Member.findByIdAndUpdate(memberId, { $set: updateData }, { new: true }).lean();
-    return data;
+    const rs = await Member.findByIdAndUpdate(memberId, { $set: updateData }, { new: true }).lean();
+    return rs;
   } catch (error) {
     throw error;
   }

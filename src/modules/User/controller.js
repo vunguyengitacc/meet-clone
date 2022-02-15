@@ -6,7 +6,7 @@ import userService from './service';
 const getAll = async (req, res, next) => {
   try {
     const users = await User.getAll();
-    Result.success(res, { users }, 201);
+    Result.success(res, { users });
   } catch (error) {
     return next(error);
   }

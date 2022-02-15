@@ -6,15 +6,11 @@ import messageService from './service';
 const getAllInRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-
-    const messages = await Message.populate('member')
-      .find({ member: { $elemMath: { roomId } } })
-      .populate({
-        path: 'member',
-        populate: { path: 'user' },
-      });
-
-    Result.success(res, { messages }, 201);
+    let messages = await await Message.find()
+      .populate({ path: 'member', populate: { path: 'user' } })
+      .lean();
+    const rs = messages.filter((i) => i.member.roomId.toString() === roomId);
+    Result.success(res, { rs });
   } catch (error) {
     return next(error);
   }

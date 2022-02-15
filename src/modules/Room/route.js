@@ -5,11 +5,8 @@ import notificationController from 'modules/Notification/controller';
 import roomController from './controller';
 const RoomRouter = Router();
 
-RoomRouter.route('/:roomId')
-  .get(roomController.getOne)
-  .post(roomController.create)
-  .put(roomController.update)
-  .delete(roomController.deleteOne);
+RoomRouter.route('/').post(roomController.create);
+RoomRouter.route('/:roomId').get(roomController.getOne).put(roomController.update).delete(roomController.deleteOne);
 
 RoomRouter.route('/:roomId/members').get(memberController.getAllInRoom).post(memberController.join);
 RoomRouter.route('/:roomId/requests/:userId').post(memberController.acceptRequest);

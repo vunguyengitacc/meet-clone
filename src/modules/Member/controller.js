@@ -7,7 +7,7 @@ const getAllInRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
     const members = await Member.find({ roomId });
-    Result.success(res, { members }, 201);
+    Result.success(res, { members });
   } catch (error) {
     return next(error);
   }
@@ -18,7 +18,7 @@ const join = async (req, res, next) => {
     const { roomId } = req.params;
     const userId = req.user._id;
     const member = await Member.findOne({ roomId, userId }).lean();
-    if (member) return Result.error(res, { message: `Member existed` });
+    if (member) return Result.success(res, { member }, 201);
     const room = await Room.findById(roomId).lean();
     if (room.isPrivate) {
       await Room.updateOne({ _id: room._id }, { $addToSet: { joinRequest: userId } });
@@ -60,7 +60,7 @@ const deleteOne = async (req, res, next) => {
     const member = await Member.findOne({ roomId, userId }).lean();
     if (member._id === memberId || member.isAdmin) await memberService.deleteOne(member._id);
     else return Result.error(res, { message: `Unauthorized` });
-    Result.success(res, { message: 'Successfully' }, 201);
+    Result.success(res, { message: 'Successfully' }, 202);
   } catch (error) {
     return next(error);
   }

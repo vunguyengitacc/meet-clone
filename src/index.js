@@ -1,4 +1,5 @@
 import compression from 'compression';
+import { morganConfig } from 'configs/morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { connectDB } from 'db';
@@ -13,6 +14,7 @@ const app = express();
 const httpServer = createServer(app);
 
 connectDB();
+app.use(morganConfig);
 app.use(compression({ level: 6 }));
 app.use(cookieParser());
 app.use(cors({}));

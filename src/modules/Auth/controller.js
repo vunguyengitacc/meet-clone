@@ -5,7 +5,7 @@ import { createAccessToken } from 'utilities/tokenUtil';
 
 const getMe = async (req, res, next) => {
   try {
-    Result.success(res, { currentUser: req.user }, 201);
+    Result.success(res, { currentUser: req.user });
   } catch (error) {
     return next(error);
   }
@@ -23,7 +23,7 @@ const login = async (req, res, next) => {
       return Result.error(res, { message: 'Wrong password' }, 401);
     }
     const access_token = createAccessToken(user);
-    Result.success(res, { access_token }, 201);
+    Result.success(res, { access_token });
   } catch (error) {
     return next(error);
   }
