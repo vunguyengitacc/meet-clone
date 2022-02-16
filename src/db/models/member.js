@@ -4,7 +4,9 @@ const memberSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'rooms' },
-    permissionId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'permissions' }],
+    enalbleShareMicro: Boolean,
+    enalbleShareWebcam: Boolean,
+    enalbleShareScreen: Boolean,
     isAdmin: Boolean,
   },
   {
@@ -27,12 +29,6 @@ memberSchema.virtual('room', {
   localField: 'roomId',
   foreignField: '_id',
   justOne: true,
-});
-
-memberSchema.virtual('permissions', {
-  ref: 'permissions',
-  localField: 'permissionId',
-  foreignField: '_id',
 });
 
 const Member = mongoose.model('members', memberSchema);

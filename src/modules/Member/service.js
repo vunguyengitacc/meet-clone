@@ -10,6 +10,9 @@ const getOne = async ({ memberId }) => {
 };
 const create = async (data) => {
   try {
+    data.enableShareScreen = true;
+    data.enalbleShareWebcam = true;
+    data.enableShareMicro = true;
     const rs = await Member.create(data);
     return rs;
   } catch (error) {

@@ -4,7 +4,7 @@ const roomSchema = new mongoose.Schema(
   {
     name: String,
     description: String,
-    accessLink: {
+    accessCode: {
       type: String,
       unique: true,
     },

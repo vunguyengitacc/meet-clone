@@ -1,3 +1,4 @@
+import Member from 'db/models/member';
 import Room from 'db/models/room';
 
 const getOne = async ({ roomId }) => {
@@ -30,6 +31,7 @@ const update = async (roomId, data) => {
 const deleteOne = async (roomId) => {
   try {
     const data = await Room.findByIdAndDelete(roomId);
+    await Member.deleteMany({ roomId });
     return data;
   } catch (error) {
     throw error;
