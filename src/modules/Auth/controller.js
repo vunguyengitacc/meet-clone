@@ -3,14 +3,6 @@ import User from 'db/models/user';
 import Result from 'utilities/responseUtil';
 import { createAccessToken } from 'utilities/tokenUtil';
 
-const getMe = async (req, res, next) => {
-  try {
-    Result.success(res, { currentUser: req.user });
-  } catch (error) {
-    return next(error);
-  }
-};
-
 const login = async (req, res, next) => {
   try {
     const { account, password } = req.body;
@@ -40,6 +32,7 @@ const register = async (req, res, next) => {
     if (emailChecker) {
       return Result.error(res, { message: 'Email has been already used' });
     }
+
     const hash = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       fullname,
@@ -55,5 +48,5 @@ const register = async (req, res, next) => {
   }
 };
 
-const authController = { login, register, getMe };
+const authController = { login, register };
 export default authController;

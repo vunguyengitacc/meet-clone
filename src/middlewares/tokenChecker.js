@@ -6,7 +6,7 @@ const tokenChecker = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (!token) {
-      return Result.error(res, { message: 'No token provided' }, 403);
+      return Result.error(res, { message: 'Token is required' }, 403);
     }
     token = token.split(' ')[1];
     const decode = await jwt.verify(token, process.env.SECRET);

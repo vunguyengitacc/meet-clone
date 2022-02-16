@@ -2,16 +2,16 @@ import User from 'db/models/user';
 
 const getOne = async ({ userId }) => {
   try {
-    const user = await User.findById(userId).lean();
-    return user;
+    const rs = await User.findById(userId).lean();
+    return rs;
   } catch (error) {
     return next(error);
   }
 };
 const update = async (userId, updateData) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true }).lean();
-    return updatedUser;
+    const rs = await User.findByIdAndUpdate(userId, { $set: updateData }, { new: true }).lean();
+    return rs;
   } catch (error) {
     throw error;
   }

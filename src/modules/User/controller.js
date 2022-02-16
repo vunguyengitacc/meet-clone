@@ -3,10 +3,9 @@ import User from 'db/models/user';
 import Result from 'utilities/responseUtil';
 import userService from './service';
 
-const getAll = async (req, res, next) => {
+const getMe = async (req, res, next) => {
   try {
-    const users = await User.getAll();
-    Result.success(res, { users });
+    Result.success(res, { currentUser: req.user });
   } catch (error) {
     return next(error);
   }
@@ -41,5 +40,5 @@ const updatePassword = async (req, res, next) => {
   }
 };
 
-const userController = { getAll, updateInfo, updatePassword };
+const userController = { getMe, updateInfo, updatePassword };
 export default userController;
