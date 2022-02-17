@@ -3,7 +3,7 @@ import Room from 'db/models/room';
 import Result from 'utilities/responseUtil';
 import roomService from './service';
 import { v4 as uuidv4 } from 'uuid';
-import memberService from 'modules/Member/service';
+import { createAccessToken } from 'utilities/tokenUtil';
 
 const getAll = async (req, res, next) => {
   try {
@@ -18,6 +18,7 @@ const getOne = async (req, res, next) => {
   try {
     const { roomId } = req.params;
     const data = await Room.findOne({ $or: [{ accessCode: roomId }] }).lean();
+    if (!data) return Result.error(res, { message: 'Room is not existed' });
     Result.success(res, { data });
   } catch (error) {
     return next(error);
@@ -28,9 +29,9 @@ const create = async (req, res, next) => {
   try {
     let payload = { ...req.body };
     payload.accessCode = uuidv4();
-    const data = await roomService.create(payload);
-    await memberService.create({ roomId: data._id, userId: req.user._id, isAdmin: true });
-    Result.success(res, { data }, 201);
+    const room = await roomService.create(payload);
+    const joinCode = createAccessToken({ roomId: room._id, userId: req.user._id, isAdmin: true });
+    Result.success(res, { result: { room, joinCode } }, 201);
   } catch (error) {
     return next(error);
   }

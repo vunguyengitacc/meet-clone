@@ -13,7 +13,7 @@ const create = async (data) => {
     data.enableShareScreen = true;
     data.enalbleShareWebcam = true;
     data.enableShareMicro = true;
-    const rs = await Member.create(data);
+    let rs = await Member.create(data);
     return rs;
   } catch (error) {
     throw error;

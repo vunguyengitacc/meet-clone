@@ -7,6 +7,7 @@ const memberSchema = new mongoose.Schema(
     enalbleShareMicro: Boolean,
     enalbleShareWebcam: Boolean,
     enalbleShareScreen: Boolean,
+    joinSession: String,
     isAdmin: Boolean,
   },
   {
