@@ -16,8 +16,8 @@ const getAllInRoom = async (req, res, next) => {
 const getMeInRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    const members = await Member.findOne({ roomId, userId: req.user._id }).lean();
-    Result.success(res, { members });
+    const data = await Member.findOne({ roomId, userId: req.user._id }).populate('user').lean();
+    Result.success(res, { data });
   } catch (error) {
     return next(error);
   }

@@ -7,8 +7,8 @@ import memberService from 'modules/Member/service';
 
 const getAll = async (req, res, next) => {
   try {
-    const rooms = await Room.getAll();
-    Result.success(res, { rooms });
+    const data = await Room.getAll().lean();
+    Result.success(res, { data });
   } catch (error) {
     return next(error);
   }
@@ -17,8 +17,8 @@ const getAll = async (req, res, next) => {
 const getOne = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    const room = await Room.findById(roomId);
-    Result.success(res, { room });
+    const data = await Room.findOne({ $or: [{ accessCode: roomId }] }).lean();
+    Result.success(res, { data });
   } catch (error) {
     return next(error);
   }
