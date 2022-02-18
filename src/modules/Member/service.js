@@ -1,4 +1,5 @@
 import Member from 'db/models/member';
+import roomService from 'modules/Room/service';
 
 const getOne = async ({ memberId }) => {
   try {
@@ -35,6 +36,16 @@ const deleteOne = async (memberId) => {
     throw error;
   }
 };
+const deleteByInfor = async (data) => {
+  try {
+    const rs = await Member.findOneAndDelete(data);
+    const count = await Member.find({ roomId: rs.roomId }).countDocuments();
+    if (count === 0) await roomService.deleteOne(rs.roomId);
+    return rs;
+  } catch (error) {
+    throw error;
+  }
+};
 
-const memberService = { getOne, create, update, deleteOne };
+const memberService = { getOne, create, update, deleteOne, deleteByInfor };
 export default memberService;

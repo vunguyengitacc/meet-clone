@@ -4,6 +4,7 @@ import Result from 'utilities/responseUtil';
 import roomService from './service';
 import { v4 as uuidv4 } from 'uuid';
 import { createAccessToken } from 'utilities/tokenUtil';
+import memberService from 'modules/Member/service';
 
 const getAll = async (req, res, next) => {
   try {
@@ -30,7 +31,7 @@ const create = async (req, res, next) => {
     let payload = { ...req.body };
     payload.accessCode = uuidv4();
     const room = await roomService.create(payload);
-    const joinCode = createAccessToken({ roomId: room._id, userId: req.user._id, isAdmin: true });
+    const joinCode = createAccessToken({ roomId: room._id, userId: req.user._id, isAdmin: true, session: uuidv4() });
     Result.success(res, { result: { room, joinCode } }, 201);
   } catch (error) {
     return next(error);
@@ -51,9 +52,12 @@ const update = async (req, res, next) => {
 const deleteOne = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    const member = await Member.findOne({ roomId, userId: req.user._id }).populate('roles').lean();
+    const { io } = req.app;
+    const member = await Member.findOne({ roomId, userId: req.user._id }).lean();
     if (!member.isAdmin) return Result.error(res, { message: `Unauthorized` });
     const rs = await roomService.deleteOne(roomId);
+    await Member.deleteMany({ roomId: roomId });
+    io.sockets.in(`room/${roomId}`).emit('room:finish', rs);
     Result.success(res, { rs }, 202);
   } catch (error) {
     return next(error);

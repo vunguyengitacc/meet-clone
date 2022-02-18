@@ -14,7 +14,7 @@ const login = async (req, res, next) => {
     if (!passwordComparer) {
       return Result.error(res, { message: 'Wrong password' }, 401);
     }
-    const access_token = createAccessToken({ id: user._id, ussername: user.username });
+    const access_token = createAccessToken({ id: user._id, username: user.username });
     Result.success(res, { access_token });
   } catch (error) {
     return next(error);
@@ -41,7 +41,7 @@ const register = async (req, res, next) => {
       password: hash,
       avatarURI: `https://avatars.dicebear.com/4.5/api/initials/${fullname}.svg`,
     });
-    const access_token = createAccessToken({ id: newUser._id, ussername: newUser.username });
+    const access_token = createAccessToken({ id: newUser._id, username: newUser.username });
     Result.success(res, { access_token }, 201);
   } catch (error) {
     return next(error);
