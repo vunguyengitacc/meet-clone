@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "-": "0.0.1",
     "@babel/cli": "^7.17.0",
     "@babel/core": "^7.17.2",
     "@babel/node": "^7.16.8",
@@ -24,9 +25,13 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
+    "g": "^2.0.1",
+    "gyp": "^0.5.0",
     "jsonwebtoken": "^8.5.1",
+    "mediasoup": "^3.9.6",
     "mongoose": "^6.2.1",
     "morgan": "^1.10.0",
+    "node": "^17.4.0",
     "nodemon": "^2.0.15",
     "socket.io": "^4.4.1",
     "uuid": "^8.3.2"
