@@ -11,6 +11,7 @@ import memberService from 'modules/Member/service';
 import path from 'path';
 import MasterRoute from 'routes';
 import { Server } from 'socket.io';
+import { createWebRtcTransport, mediaCodecs } from 'utilities/mediasoupUtil';
 
 require('dotenv').config();
 const app = express();
@@ -43,7 +44,6 @@ const createWorker = async () => {
       rtcMinPort: 2000,
       rtcMaxPort: 3000,
     });
-    console.log(`worker pid ${worker.pid}`);
 
     worker.on('died', (error) => {});
 
@@ -52,22 +52,7 @@ const createWorker = async () => {
     console.log(error);
   }
 };
-const mediaCodecs = [
-  {
-    kind: 'audio',
-    mimeType: 'audio/opus',
-    clockRate: 48000,
-    channels: 2,
-  },
-  {
-    kind: 'video',
-    mimeType: 'video/VP8',
-    clockRate: 90000,
-    parameters: {
-      'x-google-start-bitrate': 1000,
-    },
-  },
-];
+
 worker = createWorker();
 
 const createRoom = async (roomName, socketId) => {
@@ -89,41 +74,9 @@ const createRoom = async (roomName, socketId) => {
     return router1;
   } catch (error) {}
 };
-const createWebRtcTransport = async (router) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const webRtcTransport_options = {
-        listenIps: [
-          {
-            ip: '127.0.0.1',
-            announcedIp: '127.0.0.1',
-          },
-        ],
-        enableUdp: true,
-        enableTcp: true,
-        preferUdp: true,
-      };
 
-      let transport = await router.createWebRtcTransport(webRtcTransport_options);
-      console.log(`transport id: ${transport.id} of router ${router.id}`);
-
-      transport.on('dtlsstatechange', (dtlsState) => {
-        if (dtlsState === 'closed') {
-          transport.close();
-        }
-      });
-
-      transport.on('close', () => {
-        console.log('transport closed');
-      });
-
-      resolve(transport);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
 const addTransport = (transport, roomName, consumer, socket) => {
+  transports = transports.filter((transportData) => transportData.id === transport.id);
   transports = [...transports, { socketId: socket.id, transport, roomName, consumer }];
 
   peers[socket.id] = {
@@ -151,7 +104,6 @@ const informConsumers = (roomName, socketId, id, joinCode) => {
     .filter((i) => i.roomName === roomName && i.socket.id !== socketId)
     .forEach((i) => {
       const { socket } = i;
-
       socket.emit('new-producer', { producerId: id, spec: joinCode });
     });
 };
@@ -165,7 +117,7 @@ const onConnection = (socket) => {
   });
   socket.on('meet:join', async (data, callback) => {
     try {
-      if (socket.data.joinCode === undefined) socket.data.joinCode = [];
+      console.log(socket.data.userInfor);
       socket.data.joinCode = data.joinCode;
       if (data.roomId == undefined) throw new Error('invalid room');
       socket.join(`room/${data.roomId}`);
@@ -208,9 +160,7 @@ const onConnection = (socket) => {
 
           addTransport(transport, roomName, consumer, socket);
         },
-        (error) => {
-          console.log(error);
-        }
+        (error) => {}
       );
     } catch (error) {
       callback({ error });
@@ -233,7 +183,7 @@ const onConnection = (socket) => {
     informConsumers(roomName, socket.id, producer.id, socket.data.joinCode);
 
     producer.on('transportclose', () => {
-      console.log('transport for this producer closed');
+      console.log(`transport for this producer ${producer.id} closed`);
       producer.close();
     });
 
@@ -288,8 +238,13 @@ const onConnection = (socket) => {
         });
 
         consumer.on('producerclose', () => {
-          console.log('producer of consumer closed');
-          socket.emit('producer-closed', { remoteProducerId, spec: socket.data.joinCode });
+          console.log(`producer of consumer ${consumer.id} closed`);
+
+          let temp = producers.find((i) => i.producer.id === remoteProducerId);
+
+          let producerPeer = peers[temp.socketId];
+
+          socket.emit('producer-closed', { remoteProducerId, spec: producerPeer.socket.data.joinCode });
 
           consumerTransport.close([]);
           transports = transports.filter((transportData) => transportData.transport.id !== consumerTransport.id);

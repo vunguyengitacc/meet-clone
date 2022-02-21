@@ -19,15 +19,10 @@ const mediaCodecs = [
 
 const createWorker = async () => {
   try {
-    let worker = await mediasoup.createWorker({
+    return await mediasoup.createWorker({
       rtcMinPort: 2000,
       rtcMaxPort: 2100,
     });
-    console.log(`worker pid ${worker.pid}`);
-
-    worker.on('died', (error) => {});
-
-    return worker;
   } catch (error) {
     console.log(error);
   }
