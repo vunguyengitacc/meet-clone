@@ -61,7 +61,6 @@ const getTransport = (socketId) => {
   const [producerTransport] = transports.filter((transport) => transport.socketId === socketId && !transport.consumer);
   return producerTransport.transport;
 };
-
 const addProducer = (producer, roomName, socket) => {
   producers = [...producers, { socketId: socket.id, producer, roomName }];
 
@@ -70,7 +69,6 @@ const addProducer = (producer, roomName, socket) => {
     producers: [...peers[socket.id].producers, producer.id],
   };
 };
-
 const informConsumers = (roomName, socketId, id, joinCode) => {
   let temp = Object.values(peers);
   temp
@@ -184,7 +182,10 @@ const getConnectionApp = (io) => (socket) => {
       consumers: [...peers[socket.id].consumers, consumer.id],
     };
   };
-
+  socket.on('producer-closing', ({ producerId }) => {
+    const producerData = producers.filter((i) => i.producer.id === producerId)[0];
+    producerData.producer.close();
+  });
   socket.on('consume', async ({ rtpCapabilities, remoteProducerId, serverConsumerTransportId }, callback) => {
     try {
       const { roomName } = peers[socket.id];
@@ -199,7 +200,6 @@ const getConnectionApp = (io) => (socket) => {
           rtpCapabilities,
         })
       ) {
-        // transport can now consume and return a consumer
         const consumer = await consumerTransport.consume({
           producerId: remoteProducerId,
           rtpCapabilities,
@@ -211,16 +211,13 @@ const getConnectionApp = (io) => (socket) => {
         });
 
         consumer.on('producerclose', () => {
-          console.log(`producer of consumer ${consumer.id} closed`);
+          console.log(`producer ${remoteProducerId} closed`);
 
           let temp = producers.find((i) => i.producer.id === remoteProducerId);
 
           let producerPeer = peers[temp.socketId];
-
           socket.emit('producer-closed', { remoteProducerId, spec: producerPeer.socket.data.joinCode });
 
-          consumerTransport.close([]);
-          transports = transports.filter((transportData) => transportData.transport.id !== consumerTransport.id);
           consumer.close();
           consumers = consumers.filter((consumerData) => consumerData.consumer.id !== consumer.id);
         });
@@ -257,9 +254,7 @@ const getConnectionApp = (io) => (socket) => {
       console.log(error);
     }
   });
-
   socket.on('getProducers', (callback) => {
-    //return all producer transports
     const { roomName } = peers[socket.id];
 
     let producerList = [];
@@ -273,7 +268,6 @@ const getConnectionApp = (io) => (socket) => {
     // return the producer list back to the client
     callback(producerList);
   });
-
   socket.on('meet:exit', (data) => {
     socket.leave(`room/${data.roomId}`);
   });
