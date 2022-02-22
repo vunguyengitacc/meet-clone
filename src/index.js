@@ -3,14 +3,12 @@ import { morganConfig } from 'configs/morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { connectDB } from 'db';
-import Member from 'db/models/member';
 import express from 'express';
 import { createServer } from 'http';
-import jwt from 'jsonwebtoken';
-import memberService from 'modules/Member/service';
 import path from 'path';
 import MasterRoute from 'routes';
 import { Server } from 'socket.io';
+import getConnectionApp from 'utilities/appUtil';
 
 require('dotenv').config();
 const app = express();
@@ -30,30 +28,6 @@ const port = process.env.PORT || 8000;
 const io = new Server(httpServer, { cors: { origin: process.env.CLIENT_URL } });
 httpServer.listen(port);
 
-const onConnection = (socket) => {
-  app.io = io;
-  app.socket = socket;
-  socket.on('auth', async (data) => {
-    const decode = await jwt.verify(data.token, process.env.SECRET);
-    socket.data.userInfor = decode;
-  });
-  socket.on('meet:join', (data, callback) => {
-    if (socket.data.joinCode === undefined) socket.data.joinCode = [];
-    socket.data.joinCode.push(data.joinCode);
-    socket.join(`room/${data.roomId}`);
-    callback({ msg: 'success' });
-  });
-  socket.on('meet:exit', (data) => {
-    socket.leave(`room/${data.roomId}`);
-  });
-  socket.on('disconnect', () => {
-    let joins = socket.data.joinCode ?? [];
-    joins.forEach(async (i) => {
-      const { roomId, userId } = await jwt.verify(i, process.env.SECRET);
-      let rs = await memberService.deleteByInfor({ roomId, userId, joinSession: i });
-      io.sockets.in(`room/${roomId}`).emit('room:member-quit', rs);
-    });
-  });
-};
+io.on('connection', getConnectionApp(io));
 
-io.on('connection', onConnection);
+export default app;
