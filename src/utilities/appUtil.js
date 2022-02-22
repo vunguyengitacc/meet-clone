@@ -8,7 +8,7 @@ let worker;
 let rooms = {}; // { roomName1: { Router, rooms: [ sicketId1, ... ] }, ...}
 let peers = {}; // { socketId1: { roomName1, joinCode, socket, transports = [id1, id2,] }, producers = [id1, id2,] }, consumers = [id1, id2,], other }, ...}
 let transports = []; // [ { socketId1, roomName1, transport, consumer }, ... ]
-let producers = []; // [ { socketId1, roomName1, producer, }, ... ]
+let producers = []; // [ { socketId1, roomName1, producer, type }, ... ]
 let consumers = []; // [ { socketId1, roomName1, consumer, }, ... ]
 
 const createWorker = async () => {
@@ -61,21 +61,21 @@ const getTransport = (socketId) => {
   const [producerTransport] = transports.filter((transport) => transport.socketId === socketId && !transport.consumer);
   return producerTransport.transport;
 };
-const addProducer = (producer, roomName, socket) => {
-  producers = [...producers, { socketId: socket.id, producer, roomName }];
+const addProducer = (producer, roomName, socket, type) => {
+  producers = [...producers, { socketId: socket.id, producer, roomName, type }];
 
   peers[socket.id] = {
     ...peers[socket.id],
     producers: [...peers[socket.id].producers, producer.id],
   };
 };
-const informConsumers = (roomName, socketId, id, joinCode) => {
+const informConsumers = (roomName, socketId, id, joinCode, type) => {
   let temp = Object.values(peers);
   temp
     .filter((i) => i.roomName === roomName && i.socket.id !== socketId)
     .forEach((i) => {
       const { socket } = i;
-      socket.emit('new-producer', { producerId: id, spec: joinCode });
+      socket.emit('new-producer', { producerId: id, spec: joinCode, type });
     });
 };
 const getConnectionApp = (io) => (socket) => {
@@ -149,9 +149,9 @@ const getConnectionApp = (io) => (socket) => {
     // add producer to the producers array
     const { roomName } = peers[socket.id];
 
-    addProducer(producer, roomName, socket);
+    addProducer(producer, roomName, socket, appData.type);
 
-    informConsumers(roomName, socket.id, producer.id, socket.data.joinCode);
+    informConsumers(roomName, socket.id, producer.id, socket.data.joinCode, appData.type);
 
     producer.on('transportclose', () => {
       console.log(`transport for this producer ${producer.id} closed`);
@@ -255,14 +255,14 @@ const getConnectionApp = (io) => (socket) => {
       console.log(error);
     }
   });
-  socket.on('getProducers', (callback) => {
+  socket.on('get-old-producers', (callback) => {
     const { roomName } = peers[socket.id];
 
     let producerList = [];
     producers.forEach((producerData) => {
       if (producerData.socketId !== socket.id && producerData.roomName === roomName) {
         let temp = peers[producerData.socketId].socket.data.joinCode;
-        producerList = [...producerList, { producerId: producerData.producer.id, spec: temp }];
+        producerList = [...producerList, { producerId: producerData.producer.id, spec: temp, type }];
       }
     });
 
