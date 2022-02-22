@@ -28,7 +28,7 @@ const createWorker = async () => {
   }
 };
 
-const createWebRtcTransport = async (router) => {
+const createWebRtcTransport = async (router, socket) => {
   return new Promise(async (resolve, reject) => {
     try {
       const webRtcTransport_options = {
@@ -44,7 +44,7 @@ const createWebRtcTransport = async (router) => {
       };
 
       let transport = await router.createWebRtcTransport(webRtcTransport_options);
-      console.log(`transport id: ${transport.id} of router ${router.id}`);
+      console.log(`transport id: ${transport.id} of socket ${socket.id}`);
 
       transport.on('dtlsstatechange', (dtlsState) => {
         if (dtlsState === 'closed') {

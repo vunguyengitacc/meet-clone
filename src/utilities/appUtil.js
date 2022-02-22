@@ -117,7 +117,7 @@ const getConnectionApp = (io) => (socket) => {
 
       const router = rooms[roomName].router;
 
-      createWebRtcTransport(router).then(
+      createWebRtcTransport(router, socket).then(
         (transport) => {
           callback({
             transportParams: {
@@ -139,7 +139,7 @@ const getConnectionApp = (io) => (socket) => {
   socket.on('transport-connect', ({ dtlsParameters }) => {
     getTransport(socket.id).connect({ dtlsParameters });
   });
-  socket.on('transport-produce', async ({ kind, rtpParameters }, callback) => {
+  socket.on('transport-produce', async ({ kind, rtpParameters, appData }, callback) => {
     const producer = await getTransport(socket.id).produce({
       kind,
       rtpParameters,
@@ -162,6 +162,7 @@ const getConnectionApp = (io) => (socket) => {
     callback({
       id: producer.id,
       producersExist: producers.length > 1 ? true : false,
+      type: appData.type,
     });
   });
   socket.on('transport-recv-connect', async ({ dtlsParameters, serverConsumerTransportId }) => {
@@ -183,16 +184,16 @@ const getConnectionApp = (io) => (socket) => {
     };
   };
   socket.on('producer-closing', ({ producerId }) => {
+    console.log(producerId + ' is closing...');
     const producerData = producers.filter((i) => i.producer.id === producerId)[0];
-    producerData.producer.close();
+    producerData?.producer?.close();
   });
   socket.on('consume', async ({ rtpCapabilities, remoteProducerId, serverConsumerTransportId }, callback) => {
     try {
       const { roomName } = peers[socket.id];
       const router = rooms[roomName].router;
-      let consumerTransport = transports.filter(
-        (i) => i.consumer && i.transport.internal.transportId == serverConsumerTransportId
-      )[0].transport;
+      let consumerTransport = transports.filter((i) => i.consumer && i.transport.id == serverConsumerTransportId)[0]
+        .transport;
 
       if (
         router.canConsume({
