@@ -217,7 +217,11 @@ const getConnectionApp = (io) => (socket) => {
           let temp = producers.find((i) => i.producer.id === remoteProducerId);
 
           let producerPeer = peers[temp.socketId];
-          socket.emit('producer-closed', { remoteProducerId, spec: producerPeer.socket.data.joinCode });
+          socket.emit('producer-closed', {
+            remoteProducerId,
+            spec: producerPeer.socket.data.joinCode,
+            type: temp.type,
+          });
 
           consumer.close();
           consumers = consumers.filter((consumerData) => consumerData.consumer.id !== consumer.id);
@@ -262,7 +266,7 @@ const getConnectionApp = (io) => (socket) => {
     producers.forEach((producerData) => {
       if (producerData.socketId !== socket.id && producerData.roomName === roomName) {
         let temp = peers[producerData.socketId].socket.data.joinCode;
-        producerList = [...producerList, { producerId: producerData.producer.id, spec: temp, type }];
+        producerList = [...producerList, { producerId: producerData.producer.id, spec: temp, type: producerData.type }];
       }
     });
 
