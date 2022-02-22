@@ -7,6 +7,9 @@ export const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+    mongoose.connection.db.dropCollection('rooms');
+    mongoose.connection.db.dropCollection('messages');
+    mongoose.connection.db.dropCollection('members');
     logger('Success', 'Mongoose is connected!!!');
   } catch (error) {
     console.log(error);
