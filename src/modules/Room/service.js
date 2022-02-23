@@ -14,13 +14,14 @@ const create = async (data) => {
     if (!data.isPrivate) data.isPrivate = false;
     if (!data.isShowOldMessage) data.isShowOldMessage = false;
     if (!data.isRecording) data.isRecording = false;
+    if (!data.isAllowMessage) data.isAllowMessage = false;
     const rs = await Room.create(data);
     return rs;
   } catch (error) {
     throw error;
   }
 };
-const update = async (roomId, data) => {
+const update = async (roomId, updateData) => {
   try {
     const data = await Room.findByIdAndUpdate(roomId, { $set: updateData }, { new: true }).lean();
     return data;

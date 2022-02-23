@@ -6,11 +6,14 @@ import messageService from './service';
 const getAllInRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    let messages = await Message.find()
+    let data = await Message.find()
       .populate({ path: 'member', populate: { path: 'user' } })
       .lean();
-    const rs = messages.filter((i) => i.member.roomId.toString() === roomId);
-    Result.success(res, { rs });
+
+    console.log(data);
+
+    const messages = data.filter((i) => i.member?.roomId.toString() === roomId);
+    Result.success(res, { messages });
   } catch (error) {
     return next(error);
   }
@@ -29,7 +32,9 @@ const create = async (req, res, next) => {
     message.memberId = memberData._id;
 
     const rs = await messageService.create(message);
-    message = await Message.findById(rs._id).populate('member').lean();
+    message = await Message.findById(rs._id)
+      .populate({ path: 'member', populate: { path: 'user' } })
+      .lean();
     io?.sockets.in(`room/${member.roomId}`).emit('message:new', message);
 
     Result.success(res, { message }, 201);
