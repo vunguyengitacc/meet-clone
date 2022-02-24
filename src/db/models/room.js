@@ -12,6 +12,9 @@ const roomSchema = new mongoose.Schema(
     isRecording: Boolean,
     isShowOldMessage: Boolean,
     isAllowMessage: Boolean,
+    isAllowShareScreen: Boolean,
+    isAllowShareWebcam: Boolean,
+    isAllowShareMicro: Boolean,
     joinRequest: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }],
   },
   {
