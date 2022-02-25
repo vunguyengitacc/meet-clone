@@ -15,7 +15,6 @@ const roomSchema = new mongoose.Schema(
     isAllowShareScreen: Boolean,
     isAllowShareWebcam: Boolean,
     isAllowShareMicro: Boolean,
-    joinRequest: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }],
   },
   {
     toJSON: {
