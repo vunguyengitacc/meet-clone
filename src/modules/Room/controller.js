@@ -4,7 +4,6 @@ import Result from 'utilities/responseUtil';
 import roomService from './service';
 import { v4 as uuidv4 } from 'uuid';
 import { createAccessToken } from 'utilities/tokenUtil';
-import memberService from 'modules/Member/service';
 
 const getAll = async (req, res, next) => {
   try {
