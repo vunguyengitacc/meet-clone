@@ -6,11 +6,14 @@ import messageService from './service';
 const getAllInRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    let messages = await await Message.find()
+    let data = await Message.find()
       .populate({ path: 'member', populate: { path: 'user' } })
       .lean();
-    const rs = messages.filter((i) => i.member.roomId.toString() === roomId);
-    Result.success(res, { rs });
+
+    console.log(data);
+
+    const messages = data.filter((i) => i.member?.roomId.toString() === roomId);
+    Result.success(res, { messages });
   } catch (error) {
     return next(error);
   }
@@ -18,17 +21,23 @@ const getAllInRoom = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { roomId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user._id.toString();
+    const { io } = req.app;
+    let { member, message } = { ...req.body };
 
-    const member = await Member.findOne({ userId, roomId }).lean();
+    if (userId !== member.userId.toString()) return Result.error(res, { message: 'Unauthorized' });
 
-    const data = { ...req.body };
-    data.memberId = member._id;
+    const memberData = await Member.findById(member._id).lean();
 
-    const rs = await messageService.create(data);
+    message.memberId = memberData._id;
 
-    Result.success(res, { rs }, 201);
+    const rs = await messageService.create(message);
+    message = await Message.findById(rs._id)
+      .populate({ path: 'member', populate: { path: 'user' } })
+      .lean();
+    io?.sockets.in(`room/${member.roomId}`).emit('message:new', message);
+
+    Result.success(res, { message }, 201);
   } catch (error) {
     return next(error);
   }

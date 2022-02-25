@@ -41,9 +41,12 @@ const create = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const { roomId } = req.params;
+    const { io } = req.app;
     const payload = { ...req.body };
-    const data = await roomService.update(roomId, payload);
-    Result.success(res, { data });
+    const { notification, room } = payload;
+    const roomUpdated = await roomService.update(roomId, room);
+    io.sockets.in(`room/${roomId}`).emit('room:update', { roomUpdated, notification });
+    Result.success(res, { roomUpdated });
   } catch (error) {
     return next(error);
   }

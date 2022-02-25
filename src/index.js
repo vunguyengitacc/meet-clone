@@ -5,6 +5,7 @@ import cors from 'cors';
 import { connectDB } from 'db';
 import express from 'express';
 import { createServer } from 'http';
+import memberService from 'modules/Member/service';
 import path from 'path';
 import MasterRoute from 'routes';
 import { Server } from 'socket.io';
