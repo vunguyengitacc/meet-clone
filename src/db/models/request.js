@@ -4,7 +4,8 @@ const requestSchema = new mongoose.Schema(
   {
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'rooms' },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
-    result: Boolean,
+    status: String,
+    result: String,
   },
   {
     timestamps: true,
@@ -16,14 +17,16 @@ const requestSchema = new mongoose.Schema(
 
 requestSchema.virtual('room', {
   ref: 'rooms',
-  localField: 'roomIId',
+  localField: 'roomId',
   foreignField: '_id',
+  justOne: true,
 });
 
 requestSchema.virtual('user', {
   ref: 'users',
-  localField: 'userIId',
+  localField: 'userId',
   foreignField: '_id',
+  justOne: true,
 });
 const Request = mongoose.model('requests', requestSchema);
 

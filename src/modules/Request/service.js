@@ -9,6 +9,15 @@ const create = async (input) => {
   }
 };
 
+const updateOne = async (requestId, payload) => {
+  try {
+    const data = await Request.findByIdAndUpdate(requestId, payload);
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const deleteOne = async (requestId) => {
   try {
     const data = await Request.findByIdAndDelete(requestId);
@@ -18,5 +27,5 @@ const deleteOne = async (requestId) => {
   }
 };
 
-const requestService = { create, deleteOne };
+const requestService = { create, deleteOne, updateOne };
 export default requestService;

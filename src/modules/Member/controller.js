@@ -22,7 +22,7 @@ const getMeInRoom = async (req, res, next) => {
   try {
     const { roomId, joinCode } = req.params;
     const { io } = req.app;
-    const decode = await jwt.verify(joinCode, process.env.SECRET);
+    const decode = jwt.verify(joinCode, process.env.SECRET);
     if (decode.roomId !== roomId || decode.userId !== req.user._id.toString()) throw new Error('Invalid join code');
     let data = await Member.findOne({ roomId, userId: req.user._id, joinSession: joinCode }).populate('user').lean();
     if (data === null) {
@@ -38,25 +38,6 @@ const getMeInRoom = async (req, res, next) => {
     }
     io.sockets.in(`room/${roomId}`).emit('room:member-join', data);
     Result.success(res, { data });
-  } catch (error) {
-    return next(error);
-  }
-};
-
-const join = async (req, res, next) => {
-  try {
-    const { roomId } = req.params;
-    const userId = req.user._id;
-    const member = await Member.findOne({ roomId, userId }).lean();
-    const room = await Room.findById(roomId).lean();
-    let session = uuidv4();
-    if (room.isPrivate && (member == undefined || !member.isAdmin)) {
-      await requestService.create({ roomId, userId });
-      Result.success(res, { message: 'You are waiting for accepted' }, 201);
-    } else {
-      const joinCode = createAccessToken({ roomId, userId, session });
-      Result.success(res, { joinCode }, 201);
-    }
   } catch (error) {
     return next(error);
   }
@@ -78,5 +59,5 @@ const deleteOne = async (req, res, next) => {
   }
 };
 
-const memberController = { getAllInRoom, getMeInRoom, join, deleteOne };
+const memberController = { getAllInRoom, getMeInRoom, deleteOne };
 export default memberController;
