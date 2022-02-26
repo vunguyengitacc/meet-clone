@@ -61,8 +61,8 @@ const answerRequest = async (req, res, next) => {
         return Result.success(res, { requestUpdated }, 201);
       }
       const joinCode = createAccessToken({ roomId, userId: request.userId, session: uuidv4() });
-      io.sockets.in(`auth/${request.userId.toString()}`).emit('request/answer', { joinCode });
       const requestUpdated = await requestService.updateOne(request._id, { result: joinCode, status: 'ACCEPT' });
+      io.sockets.in(`auth/${request.userId.toString()}`).emit('request/answer', { joinCode, requestUpdated });
       Result.success(res, { requestUpdated }, 201);
     } else {
       const joinCode = createAccessToken({ roomId, userId, session: uuidv4() });
