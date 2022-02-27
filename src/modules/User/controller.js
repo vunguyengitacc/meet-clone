@@ -14,9 +14,9 @@ const updateInfo = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const payload = { ...req.body };
-    if (data.password) delete data.password;
-    const data = await userService.update(userId, payload);
-    Result.success(res, { data });
+    if (payload.password) delete payload.password;
+    const userUpdated = await userService.update(userId, payload);
+    Result.success(res, { userUpdated });
   } catch (error) {
     return next(error);
   }

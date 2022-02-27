@@ -17,6 +17,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    phone: String,
+    address: String,
     avatarURI: {
       type: String,
     },
