@@ -15,6 +15,7 @@ const roomSchema = new mongoose.Schema(
     isAllowShareScreen: Boolean,
     isAllowShareWebcam: Boolean,
     isAllowShareMicro: Boolean,
+    authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
   },
   {
     toJSON: {
@@ -24,6 +25,13 @@ const roomSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+roomSchema.virtual('author', {
+  ref: 'users',
+  localField: 'userId',
+  foreignField: '_id',
+  justOne: true,
+});
 
 roomSchema.index({ accessLink: 'text', name: 'text' });
 

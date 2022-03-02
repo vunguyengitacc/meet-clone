@@ -17,9 +17,14 @@ const getAll = async (req, res, next) => {
 const getOne = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    const data = await Room.findOne({ $or: [{ accessCode: roomId }] }).lean();
-    if (!data) return Result.error(res, { message: 'Room is not existed' });
-    Result.success(res, { data });
+    const userId = req.user._id;
+    const room = await Room.findOne({ $or: [{ accessCode: roomId }] }).lean();
+    if (!room) return Result.error(res, { message: 'Room is not existed' });
+    if (room.authorId.toString() === userId.toString()) {
+      const joinCode = createAccessToken({ roomId: room._id, userId: req.user._id, isAdmin: true, session: uuidv4() });
+      return Result.success(res, { result: { room, joinCode } });
+    }
+    return Result.success(res, { result: { room, joinCode: '' } });
   } catch (error) {
     return next(error);
   }
@@ -29,6 +34,7 @@ const create = async (req, res, next) => {
   try {
     let payload = { ...req.body };
     payload.accessCode = uuidv4();
+    payload.authorId = req.user._id;
     const room = await roomService.create(payload);
     const joinCode = createAccessToken({ roomId: room._id, userId: req.user._id, isAdmin: true, session: uuidv4() });
     Result.success(res, { result: { room, joinCode } }, 201);

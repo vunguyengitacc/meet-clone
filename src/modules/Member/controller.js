@@ -1,12 +1,8 @@
 import Member from 'db/models/member';
-import Room from 'db/models/room';
 import Result from 'utilities/responseUtil';
-import { createAccessToken } from 'utilities/tokenUtil';
 import memberService from './service';
 import jwt from 'jsonwebtoken';
 import roomService from 'modules/Room/service';
-import { v4 as uuidv4 } from 'uuid';
-import requestService from 'modules/Request/service';
 
 const getAllInRoom = async (req, res, next) => {
   try {
