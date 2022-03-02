@@ -11,7 +11,7 @@ const getOne = async ({ roomId }) => {
 };
 const create = async (data) => {
   try {
-    if (!data.isPrivate) data.isPrivate = false;
+    if (!data.isPrivate) data.isPrivate = true;
     if (!data.isShowOldMessage) data.isShowOldMessage = false;
     if (!data.isRecording) data.isRecording = false;
     if (!data.isAllowMessage) data.isAllowMessage = true;

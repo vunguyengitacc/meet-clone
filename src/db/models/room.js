@@ -16,6 +16,9 @@ const roomSchema = new mongoose.Schema(
     isAllowShareWebcam: Boolean,
     isAllowShareMicro: Boolean,
     authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+    startAt: Date,
+    remindType: Number,
+    finishedAt: Date,
   },
   {
     toJSON: {

@@ -4,6 +4,9 @@ import Result from 'utilities/responseUtil';
 import roomService from './service';
 import { v4 as uuidv4 } from 'uuid';
 import { createAccessToken } from 'utilities/tokenUtil';
+import { getMonthName, TimeValueEnum } from 'utilities/dateUtil';
+import { sendMail } from 'utilities/mailUtil';
+const cron = require('node-cron');
 
 const getAll = async (req, res, next) => {
   try {
@@ -35,11 +38,43 @@ const create = async (req, res, next) => {
     let payload = { ...req.body };
     payload.accessCode = uuidv4();
     payload.authorId = req.user._id;
+    if (payload.startAt && payload.remindType) {
+      let remindAt = new Date(payload.startAt);
+      let now = new Date();
+      switch (payload.remindType) {
+        case 1:
+          remindAt = new Date(remindAt - TimeValueEnum.MINUTE * 5);
+          if (remindAt < now) throw new Error('Invalid time');
+          break;
+        case 2:
+          remindAt = new Date(remindAt - TimeValueEnum.MINUTE * 30);
+          if (remindAt < now) throw new Error('Invalid time');
+          break;
+        case 3:
+          remindAt = new Date(remindAt - TimeValueEnum.HOUR);
+          if (remindAt < now) throw new Error('Invalid time');
+          break;
+        default:
+          if (remindAt < now) throw new Error('Invalid time');
+          break;
+      }
+      cron.schedule(
+        `${remindAt.getMinutes() + 1} ${remindAt.getHours()} ${remindAt.getDate()} ${getMonthName(remindAt)} *`,
+        () => {
+          console.log('Sending mail...');
+          sendMail(
+            req.user.email,
+            'Meet reminder',
+            `You have a meet: <a href="http://localhost:3000/meet/${payload.accessCode}">Click here</a>`
+          );
+        }
+      );
+    }
     const room = await roomService.create(payload);
     const joinCode = createAccessToken({ roomId: room._id, userId: req.user._id, isAdmin: true, session: uuidv4() });
     Result.success(res, { result: { room, joinCode } }, 201);
   } catch (error) {
-    return next(error);
+    return Result.error(res, { message: error.message }, 500);
   }
 };
 
