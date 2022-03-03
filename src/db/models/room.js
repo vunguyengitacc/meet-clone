@@ -18,7 +18,7 @@ const roomSchema = new mongoose.Schema(
     authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
     startAt: Date,
     remindType: Number,
-    finishedAt: Date,
+    finishAt: Date,
   },
   {
     toJSON: {
