@@ -17,6 +17,16 @@ const getAll = async (req, res, next) => {
   }
 };
 
+const getAllMyRoom = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const rooms = await Room.find({ authorId: userId }).lean();
+    Result.success(res, { rooms });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const getOne = async (req, res, next) => {
   try {
     const { roomId } = req.params;
@@ -107,5 +117,5 @@ const deleteOne = async (req, res, next) => {
   }
 };
 
-const roomController = { getAll, getOne, create, update, deleteOne };
+const roomController = { getAll, getAllMyRoom, getOne, create, update, deleteOne };
 export default roomController;
