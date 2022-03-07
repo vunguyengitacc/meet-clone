@@ -10,8 +10,6 @@ const getAllInRoom = async (req, res, next) => {
       .populate({ path: 'member', populate: { path: 'user' } })
       .lean();
 
-    console.log(data);
-
     const messages = data.filter((i) => i.member?.roomId.toString() === roomId);
     Result.success(res, { messages });
   } catch (error) {
