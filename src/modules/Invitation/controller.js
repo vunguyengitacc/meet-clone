@@ -4,6 +4,7 @@ import { createAccessToken } from 'utilities/tokenUtil';
 import invitationService from './service';
 import { v4 as uuidv4 } from 'uuid';
 import Notification from 'db/models/notification';
+import notificationService from 'modules/Notification/service';
 
 const getAll = async (req, res, next) => {
   try {
@@ -22,17 +23,15 @@ const create = async (req, res, next) => {
     const { io } = req.app;
     const { userId, roomId } = req.body;
     const rs = await invitationService.create({ userId, roomId });
-    const invitation = await Invitation.findById(rs._id)
-      .populate({ path: 'room', populate: { path: 'author' } })
-      .lean();
-    const notification = await Notification.create({
+    const invitation = await Invitation.findById(rs._id).populate('room').lean();
+    const temp = await Notification.create({
       userId: invitation.userId,
       name: `Invitation from ${req.user.fullname}`,
       content: invitation,
       type: 'INVITATION',
       fromId: req.user._id,
     });
-    notification.populate('from');
+    const notification = await Notification.findById(temp._id).populate('from').lean();
     io.sockets.in(`auth/${invitation.userId.toString()}`).emit('notification:new', { notification });
     Result.success(res, { invitation }, 201);
   } catch (error) {
@@ -43,7 +42,8 @@ const create = async (req, res, next) => {
 const answer = async (req, res, next) => {
   try {
     const { invitationId } = req.params;
-    const { result } = req.body;
+    const payload = req.body;
+    const { result } = payload.invitation;
     const userId = req.user._id;
     const invitation = await Invitation.findById(invitationId).populate('room').lean();
     if (invitation && userId.toString() === invitation.userId.toString()) {
@@ -55,6 +55,7 @@ const answer = async (req, res, next) => {
         await invitationService.deleteOne(invitation._id);
         Result.success(res, { message: 'success' }, 201);
       }
+      await notificationService.deleteOne(payload.notificationId);
     } else {
       throw new Error('Unauthorized');
     }
