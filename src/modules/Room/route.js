@@ -5,7 +5,7 @@ import requestController from 'modules/Request/controller';
 import roomController from './controller';
 const RoomRouter = Router();
 
-RoomRouter.route('/').post(roomController.create);
+RoomRouter.route('/').get(roomController.getAllMyRoom).post(roomController.create);
 RoomRouter.route('/:roomId').get(roomController.getOne).put(roomController.update).delete(roomController.deleteOne);
 
 RoomRouter.route('/:roomId/members').get(memberController.getAllInRoom);

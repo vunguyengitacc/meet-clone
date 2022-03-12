@@ -10,19 +10,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
-    fullname: {
-      type: String,
-    },
+    fullname: String,
     email: {
       type: String,
       unique: true,
     },
-    avatarURI: {
-      type: String,
-    },
-    bio: {
-      type: String,
-    },
+    phone: String,
+    address: String,
+    avatarURI: String,
+    bio: String,
   },
   {
     toJSON: {
@@ -37,5 +33,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.index({ username: 'text', fullname: 'text', email: 'text' });
 const User = mongoose.model('users', userSchema);
 export default User;

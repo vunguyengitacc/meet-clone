@@ -24,13 +24,18 @@ const create = async (req, res, next) => {
     const member = await Member.findOne({ roomId, userId }).lean();
     const room = await Room.findById(roomId).lean();
     let session = uuidv4();
-    if (room.isPrivate && (member == undefined || !member.isAdmin)) {
+    if (room.isPrivate && (member == undefined || !member.isAdmin) && room.authorId.toString() !== userId.toString()) {
       const data = await requestService.create({ roomId, userId, status: 'WAITING' });
       const newRequest = await Request.findById(data._id).populate('user').lean();
       io.sockets.in(`room/${room._id.toString()}`).emit('request/new', newRequest);
       Result.success(res, { newRequest }, 201);
     } else {
-      const joinCode = createAccessToken({ roomId, userId, session });
+      const joinCode = createAccessToken({
+        roomId,
+        userId,
+        session,
+        isAdmin: room.authorId.toString() === userId.toString(),
+      });
       Result.success(res, { joinCode }, 201);
     }
   } catch (error) {

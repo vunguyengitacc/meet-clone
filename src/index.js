@@ -5,10 +5,10 @@ import cors from 'cors';
 import { connectDB } from 'db';
 import express from 'express';
 import { createServer } from 'http';
-import memberService from 'modules/Member/service';
 import path from 'path';
 import MasterRoute from 'routes';
 import { Server } from 'socket.io';
+import { getAccessCode } from 'utilities/accessCodeUtil';
 import getConnectionApp from 'utilities/appUtil';
 
 require('dotenv').config();
@@ -25,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 MasterRoute(app);
 
+getAccessCode().then((rs) => console.log(rs));
 const port = process.env.PORT || 8000;
 const io = new Server(httpServer, { cors: { origin: process.env.CLIENT_URL } });
 httpServer.listen(port);
