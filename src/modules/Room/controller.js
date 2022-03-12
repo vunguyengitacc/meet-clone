@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createAccessToken } from 'utilities/tokenUtil';
 import { getMonthName, TimeValueEnum } from 'utilities/dateUtil';
 import { sendMail } from 'utilities/mailUtil';
+import { getAccessCode } from 'utilities/accessCodeUtil';
 const cron = require('node-cron');
 
 const getAll = async (req, res, next) => {
@@ -46,7 +47,7 @@ const getOne = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     let payload = { ...req.body };
-    payload.accessCode = uuidv4();
+    payload.accessCode = await getAccessCode();
     payload.authorId = req.user._id;
     if (payload.startAt && payload.remindType) {
       let remindAt = new Date(payload.startAt);
