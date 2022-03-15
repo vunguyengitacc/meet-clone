@@ -8,7 +8,6 @@ import { createServer } from 'http';
 import path from 'path';
 import MasterRoute from 'routes';
 import { Server } from 'socket.io';
-import { getAccessCode } from 'utilities/accessCodeUtil';
 import getConnectionApp from 'utilities/appUtil';
 
 require('dotenv').config();

@@ -4,6 +4,7 @@ const whiteBoardSchema = new mongoose.Schema(
   {
     name: String,
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+    data: [mongoose.Schema.Types.Mixed],
   },
   {
     timestamps: true,

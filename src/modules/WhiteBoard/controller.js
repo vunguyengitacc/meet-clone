@@ -4,7 +4,8 @@ import whiteBoardService from './service';
 
 const getMine = async (req, res, next) => {
   try {
-    const whiteBoards = await WhiteBoard.getAll().lean();
+    const userId = req.user._id;
+    const whiteBoards = await WhiteBoard.find({ userId }).lean();
     Result.success(res, { whiteBoards });
   } catch (error) {
     next(error);
