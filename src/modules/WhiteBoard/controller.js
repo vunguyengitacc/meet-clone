@@ -19,7 +19,7 @@ const create = async (req, res, next) => {
     const data = {
       ...payload,
       userId,
-      type: 'PRIVATE',
+      type: 'VIEW',
     };
     const whiteBoard = await whiteBoardService.create(data);
     Result.success(res, { whiteBoard }, 201);
