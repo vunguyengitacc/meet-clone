@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 const whiteBoardSchema = new mongoose.Schema(
   {
     name: String,
-    memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'members' },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+    data: [mongoose.Schema.Types.Mixed],
+    type: String,
   },
   {
     timestamps: true,
@@ -13,9 +15,9 @@ const whiteBoardSchema = new mongoose.Schema(
   }
 );
 
-messageSchema.virtual('member', {
-  ref: 'members',
-  localField: 'memberId',
+whiteBoardSchema.virtual('user', {
+  ref: 'users',
+  localField: 'userId',
   foreignField: '_id',
   justOne: true,
 });
