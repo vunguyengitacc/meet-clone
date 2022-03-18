@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import app from 'index';
 const mediasoup = require('mediasoup');
 import { createWebRtcTransport, mediaCodecs } from './mediasoupUtil';
+import WhiteBoard from 'db/models/whiteBoard';
 
 let worker;
 let rooms = {}; // { roomName1: { Router, rooms: [ sicketId1, ... ] }, ...}
@@ -110,6 +111,17 @@ const getConnectionApp = (io) => (socket) => {
     } catch (error) {
       console.log(error);
       callback({ error });
+    }
+  });
+  socket.on('board:join', async (data) => {
+    try {
+      const userId = socket.data.userInfor.id;
+      const whiteBoard = await WhiteBoard.findById(data).lean();
+      if (whiteBoard?._id.toString() === userId.toString() || !whiteBoard?.isPrivate)
+        socket.join(`board/${whiteBoard._id}`);
+      else throw new Error('invalid board');
+    } catch (error) {
+      console.log(error);
     }
   });
   socket.on('createWebRtcTransport', async ({ consumer }, callback) => {

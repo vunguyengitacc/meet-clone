@@ -19,6 +19,7 @@ const create = async (req, res, next) => {
     const data = {
       ...payload,
       userId,
+      type: 'PRIVATE',
     };
     const whiteBoard = await whiteBoardService.create(data);
     Result.success(res, { whiteBoard }, 201);
@@ -30,7 +31,10 @@ const create = async (req, res, next) => {
 const getOne = async (req, res, next) => {
   try {
     const { whiteBoardId } = req.params;
+    const userId = req.user._id;
     const whiteBoard = await WhiteBoard.findById(whiteBoardId).lean();
+    if (whiteBoard.type === 'PRIVATE' && whiteBoard.userId.toString() !== userId.toString())
+      throw new Error('Unauthorized');
     Result.success(res, { whiteBoard });
   } catch (error) {
     next(error);
@@ -42,11 +46,14 @@ const updateOne = async (req, res, next) => {
     const { whiteBoardId } = req.params;
     const payload = { ...req.body };
     const userId = req.user._id;
+    const { io } = req.app;
     const whiteBoard = await WhiteBoard.findById(whiteBoardId).lean();
     if (!whiteBoard) throw new Error('Not exist');
-    if (whiteBoard.userId.toString() !== userId.toString()) throw new Error('Unauthorized');
-    const data = { ...payload, userId };
+    if (whiteBoard.type !== 'EDIT' && whiteBoard.userId.toString() !== userId.toString())
+      throw new Error('Unauthorized');
+    const data = { ...payload };
     const updatedWhiteBoard = await whiteBoardService.update(whiteBoardId, data);
+    io.sockets.in(`board/${whiteBoard._id.toString()}`).emit('board:update', updatedWhiteBoard);
     Result.success(res, { updatedWhiteBoard });
   } catch (error) {
     next(error);

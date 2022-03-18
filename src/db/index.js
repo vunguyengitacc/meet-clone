@@ -13,6 +13,7 @@ export const connectDB = async () => {
     mongoose.connection.db.dropCollection('requests');
     mongoose.connection.db.dropCollection('invitations');
     mongoose.connection.db.dropCollection('notifications');
+
     logger('Success', 'Mongoose is connected!!!');
   } catch (error) {
     console.log(error);
