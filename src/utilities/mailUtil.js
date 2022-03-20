@@ -30,7 +30,7 @@ const sendMail = (target, subject, content) => {
     service: 'gmail',
     auth: {
       user: 'ngha.vu.dev@gmail.com',
-      pass: '123456@bscJ',
+      pass: '991801@bscj',
     },
   });
 
