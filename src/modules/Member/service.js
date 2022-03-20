@@ -39,8 +39,6 @@ const deleteOne = async (memberId) => {
 const deleteByInfor = async (data) => {
   try {
     const rs = await Member.findOneAndDelete(data);
-    const count = await Member.find({ roomId: rs.roomId }).countDocuments();
-    if (count === 0) await roomService.deleteOne(rs.roomId);
     return rs;
   } catch (error) {
     throw error;

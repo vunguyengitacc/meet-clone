@@ -83,9 +83,11 @@ const getConnectionApp = (io) => (socket) => {
   app.io = io;
   app.socket = socket;
   socket.on('auth', (data) => {
-    const decode = jwt.verify(data.token, process.env.SECRET);
-    socket.data.userInfor = decode;
-    socket.join(`auth/${decode.id.toString()}`);
+    if (data.token) {
+      const decode = jwt.verify(data.token, process.env.SECRET);
+      socket.data.userInfor = decode;
+      socket.join(`auth/${decode.id.toString()}`);
+    }
   });
   socket.on('meet:join', async (data, callback) => {
     try {
