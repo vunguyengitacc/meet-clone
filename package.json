@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "babel-node src/index",
-    "dev": "nodemon --exec babel-node src/index",
+    "dev": "nodemon --exec ./node_modules/.bin/babel-node src/index",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
