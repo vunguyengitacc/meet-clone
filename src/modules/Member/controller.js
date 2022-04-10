@@ -45,10 +45,12 @@ const deleteOne = async (req, res, next) => {
     const userId = req.user._id;
     const { io } = req.app;
     const member = await Member.findById(memberId).populate('user').lean();
-    if (member.userId.toString() === userId.toString() || member.isAdmin) await memberService.deleteOne(member._id);
+    const me = await Member.findOne(userId).lean();
+    if (member.userId.toString() === userId.toString() || me.isAdmin) await memberService.deleteOne(member._id);
     else return Result.error(res, { message: `Unauthorized` });
     // if (member.isAdmin) await roomService.deleteOne(roomId);
     io.sockets.in(`room/${member.roomId}`).emit('room:member-quit', member);
+    io.sockets.in(`room/${member.roomId}`).emit('room:be-kicked', member);
     Result.success(res, { message: 'Successfully' }, 202);
   } catch (error) {
     return next(error);
