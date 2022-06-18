@@ -1,7 +1,10 @@
 import bcrypt from 'bcrypt';
 import User from 'db/models/user';
+import userService from 'modules/User/service';
+import { sendVerifyMail } from 'utilities/mailUtil';
 import Result from 'utilities/responseUtil';
 import { createAccessToken } from 'utilities/tokenUtil';
+import jwt from 'jsonwebtoken';
 
 const login = async (req, res, next) => {
   try {
@@ -13,6 +16,9 @@ const login = async (req, res, next) => {
     const passwordComparer = await bcrypt.compare(password, user.password);
     if (!passwordComparer) {
       return Result.error(res, { message: 'Wrong password' }, 401);
+    }
+    if(!user.isVerifyEmail && !user.oldEmail ){
+      return Result.error(res, { message: 'Your account has not been verify yet' }, 401);
     }
     const access_token = createAccessToken({ id: user._id, username: user.username });
     Result.success(res, { access_token });
@@ -38,15 +44,40 @@ const register = async (req, res, next) => {
       fullname,
       username,
       email,
+      isVerifyEmail: false,
       password: hash,
       avatarURI: `https://avatars.dicebear.com/4.5/api/initials/${fullname}.svg`,
     });
-    const access_token = createAccessToken({ id: newUser._id, username: newUser.username });
-    Result.success(res, { access_token }, 201);
+    const user = await User.findOne({ username }).lean();
+    const code = createAccessToken({ userId: user._id, email });
+      sendVerifyMail(
+        email,
+        `Let's Meet verifying`,
+        `Please verify your account by clicking this link: <a href="http://127.0.0.1:8000/api/auth/verify/${code}">Click here</a>`
+      );
+    Result.success(res, { newUser }, 201);
   } catch (error) {
     return next(error);
   }
 };
 
-const authController = { login, register };
+const verify = async (req, res, next) => {
+  try {
+    const { code } = req.params;
+    console.log(code)
+    const decode = jwt.verify(code, process.env.SECRET);
+    const {userId, email} = decode;
+    const user = await User.findById(userId).lean();
+    if(!user && user.email !== email) return Result.error(res, { message: 'Invalid verifying process' }, 401);
+    const userUpdated = await userService.update(userId, { 
+      isVerifyEmail: true,
+      oldEmail: user.email
+     });
+    Result.success(res, { msg: "You have verified your email address! You can user this email address to connect with the app right now" }, 201);
+  } catch (error) {
+    return next(error)
+  }
+}
+
+const authController = { login, register, verify };
 export default authController;

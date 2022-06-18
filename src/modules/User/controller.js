@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt';
 import User from 'db/models/user';
+import { sendVerifyMail } from 'utilities/mailUtil';
 import Result from 'utilities/responseUtil';
 import userService from './service';
+import { createAccessToken } from 'utilities/tokenUtil';
 
 const getMe = async (req, res, next) => {
   try {
@@ -31,10 +33,31 @@ const search = async (req, res, next) => {
 const updateInfo = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const payload = { ...req.body };
+    let payload = { ...req.body }; 
+    let isUpdateEmail = false;
+    const user = await User.findById(userId).lean();
+    if(!user) return Result.error(res, { message: 'Invalid user' }, 401);
+    if(user.isVerifyEmail && payload.email && payload.email.toString()!==user.email.toString()){
+      payload.oldEmail = user.email;
+      payload.isVerifyEmail = false;
+      isUpdateEmail = true;
+      
+    }
+    else if(!user.isVerifyEmail && payload.email && payload.email.toString()!==user.email.toString()){            
+      isUpdateEmail = true;      
+    }
+    
     if (payload.password) delete payload.password;
     const userUpdated = await userService.update(userId, payload);
-    Result.success(res, { userUpdated });
+    if(isUpdateEmail) {
+      const code = createAccessToken({ userId: user._id, email: payload.email });
+      sendVerifyMail(
+        payload.email,
+        `Let's Meet verifying`,
+        `Please verify your account by clicking this link: <a href="http://127.0.0.1:8000/api/auth/verify/${code}">Click here</a>`
+      );
+    }
+    Result.success(res, { userUpdated, isUpdateEmail });
   } catch (error) {
     return next(error);
   }

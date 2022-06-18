@@ -15,10 +15,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    oldEmail: String,
+    isVerifyEmail: Boolean,
     phone: String,
     address: String,
     avatarURI: String,
-    bio: String,
+    bio: String,    
   },
   {
     toJSON: {
