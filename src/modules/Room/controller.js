@@ -74,7 +74,7 @@ const create = async (req, res, next) => {
         () => {
           console.log('Sending mail...');
           sendMail(
-            req.user.email,
+            req.user.isVerifyEmail ? req.user.email : req.user.oldEmail,
             'Meet reminder',
             `You have a meet: <a href="http://localhost:3000/meet/${payload.accessCode}">Click here</a>`
           );

@@ -52,6 +52,8 @@ const deleteOne = async (req, res, next) => {
     io.sockets.in(`room/${member.roomId}`).emit('room:member-quit', member);
     io.sockets.in(`room/${member.roomId}`).emit('room:be-kicked', member);
     Result.success(res, { message: 'Successfully' }, 202);
+    const memberInRoom = await Member.find({roomId}).lean();
+    if(memberInRoom?.length == 0) await roomService.deleteOne(roomId);    
   } catch (error) {
     return next(error);
   }

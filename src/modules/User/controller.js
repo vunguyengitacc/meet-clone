@@ -46,6 +46,10 @@ const updateInfo = async (req, res, next) => {
     else if(!user.isVerifyEmail && payload.email && payload.email.toString()!==user.email.toString()){            
       isUpdateEmail = true;      
     }
+    else if(!user.isVerifyEmail && payload?.email === user.oldEmail){
+      isUpdateEmail = false;
+      payload.isVerifyEmail = true;
+    }
     
     if (payload.password) delete payload.password;
     const userUpdated = await userService.update(userId, payload);
